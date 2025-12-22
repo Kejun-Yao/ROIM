@@ -14,15 +14,23 @@ basicDimRed <- function(seuratObj){
     return(seuratObj)
 }
 
-jointIntegration <- function(seuratObj, dimsList = list(1:50, 2:40)){
-    seuratObj <- RunHarmony(seuratObj, group.by.vars = 'orig.ident', 
-                            reduction.use = 'pca', 
-                            reduction.save = 'harmony_rna', assay.use = 'RNA',
-                            project.dim = FALSE)
-    seuratObj <- RunHarmony(seuratObj, group.by.vars = 'orig.ident', 
-                            reduction.use = 'lsi', 
-                            reduction.save = 'harmony_atac', assay.use = 'ATAC',
-                            project.dim = FALSE)
+jointIntegration <- function(seuratObj, 
+                             dimsList = list(1:50, 2:40),
+                             seed = 1){
+    seuratObj <- with_seed(seed, 
+                           RunHarmony(seuratObj, 
+                                      group.by.vars = 'orig.ident', 
+                                      reduction.use = 'pca', 
+                                      reduction.save = 'harmony_rna', 
+                                      assay.use = 'RNA',
+                                      project.dim = FALSE))
+    seuratObj <- with_seed(seed,
+                           RunHarmony(seuratObj, 
+                                      group.by.vars = 'orig.ident', 
+                                      reduction.use = 'lsi', 
+                                      reduction.save = 'harmony_atac', 
+                                      assay.use = 'ATAC',
+                                      project.dim = FALSE))
     seuratObj <- FindMultiModalNeighbors(seuratObj, 
                                          reduction.list = list('harmony_rna', 
                                                                'harmony_atac'), 

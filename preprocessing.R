@@ -30,6 +30,7 @@ seurats <- lapply(seurats, function(seuratObj) removeDoublets(seuratObj,
 seuratObj <- mergeSeurats(seurats, idents)
 qs_save(seuratObj, 'mergedSeurat.qs2')
 
+seuratObj <- qs_read('mergedSeurat.qs2')
 seuratObj <- removeRareFeatures(seuratObj, 10, 'RNA')
 seuratObj <- removeRareFeatures(seuratObj, 10, 'ATAC')
 seuratObj <- basicDimRed(seuratObj)
