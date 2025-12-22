@@ -22,4 +22,7 @@ mergeSeurats <- function(seurats, idents, project='orig.ident'){
                        seurats[seq(2, length(seurats))],
                        add.cell.ids=idents,
                        project=project)
+    DefaultAssay(seuratObj) <- 'RNA'
+    seuratObj <- JoinLayers(seuratObj)
+    return(seuratObj)
 }
