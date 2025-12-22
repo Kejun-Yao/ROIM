@@ -9,6 +9,15 @@ seurats <- mapply(function(folder, ident)
     folders, 
     idents)
 
+seurats <- lapply(folders, function(folder) 
+    qs_read(paste0(folder, 'RawSeurat.qs2')))
+
+seurats <- lapply(seurats, addBasicQCInfo)
+invisible(mapply(function(x, y) 
+    qs_save(x, paste0(y, 'QCSeurat.qs2')), seurats, folders))
+
+seurats <- lapply(seurats, basicQC)
+
 #doublets <- mapply(predictDoublets, seurats, folders, SIMPLIFY=FALSE)
 doublets <- lapply(folders, function(folder) 
     qs_read(paste0(folder, 'DoubletsRNA.qs2')))
