@@ -3,7 +3,7 @@
 .Rproj.user
 R/.test_code.R
 *.Rproj
-*.qs
+*.qs2
 *.RData
 *.txt
 *.pdf
