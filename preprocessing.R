@@ -26,3 +26,10 @@ seurats <- mapply(addDoublets, seurats, doublets, SIMPLIFY=FALSE)
 seurats <- lapply(seurats, function(seuratObj) removeDoublets(seuratObj, 
                                                               unitClass))
 seuratObj <- mergeSeurats(seurats, idents)
+qs_save(seuratObj, 'mergedSeurat.qs2')
+
+seuratObj <- removeRareFeatures(seuratObj, 10, 'RNA')
+seuratObj <- removeRareFeatures(seuratObj, 10, 'ATAC')
+seuratObj <- basicDimRed(seuratObj)
+seuratObj <- jointIntegration(seuratObj)
+qs_save(seuratObj,'preclusteringSeurat.qs2')
