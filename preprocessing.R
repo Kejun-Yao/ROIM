@@ -36,3 +36,19 @@ seuratObj <- removeRareFeatures(seuratObj, 10, 'ATAC')
 seuratObj <- basicDimRed(seuratObj)
 seuratObj <- jointIntegration(seuratObj)
 qs_save(seuratObj,'preclusteringSeurat.qs2')
+
+seuratObj <- qs_read('preclusteringSeurat.qs2')
+seuratObj <- FindClusters(seuratObj, resolution=3, graph.name='wknn')
+DimPlot(seuratObj, label=TRUE) + NoLegend()
+
+v <- clusterMean(seuratObj, 
+                 c('SLC1A3', 'RLBP1','SLITRK2'),
+                 c(7, 13, 23, 9))
+
+miniSeurat <- subset(seuratObj, seurat_clusters==7)
+
+
+
+
+
+
