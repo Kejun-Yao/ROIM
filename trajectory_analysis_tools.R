@@ -94,3 +94,28 @@ pseudotimeHeatmapPlot <- function(sce, sigGenes){
     
     return(h)
 }
+
+createResultsTable <- function(seurats, res, fileName){
+    sigRes <- subset(res, pvalue < 1e-2)
+    sigRes$df <- c()
+    sigRes <- addRanks(sigRes, signs = c(-1, 1, -1))
+    genes <- rownames(sigRes)
+    fractionCols <- paste0('Fraction', names(seurats))
+    for (i in seq_along(names(seurats))){
+        fractionCol <- fractionCols[i]
+        condition <- names(seurats)[i]
+        nCells <- ncol(seurats[[i]])
+        fraction <- round(genePresence(seurats[[i]], genes)[genes, ]$nCells / 
+                              nCells, 2)
+        sigRes[fractionCol] <- fraction
+    }
+    sigRes$Fraction_Mean <- round(rowMeans(sigRes[, fractionCols]), 2)
+    sigRes$Fraction_SD <- round(apply(sigRes[, fractionCols], 1, sd), 2)
+    sigRes$Fraction_Maxdif <- apply(sigRes[, fractionCols], 1, 
+                                    function(x) max(x) - min(x))
+    sigRes <- sigRes[order(sigRes$Fraction_Maxdif, decreasing=TRUE), ]
+    filename <- paste0(fileName, '.csv')
+    message('Saving file: ', fileName, '.')
+    write.csv(sigRes, fileName)
+    return(sigRes)
+}

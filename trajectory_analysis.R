@@ -18,18 +18,17 @@ p1 <- featureWes(miniSeurat, 'Lineage1', idClass='orig.ident',
     geom_segment(data=df, aes(x=x, y=y, xend=xEnd, yend=yEnd),
                  arrow = arrow(length = unit(0.1, "cm")))
 
+seurats <- SplitObject(miniSeurat, 'orig.ident')
+
+names(seurats)
 gam <- qs_read('mgcGam.qs2')
 res <- associationTest(gam)
-sigRes <- subset(res, pvalue < 1e-2)
-sigRes$df <- c()
-sigRes <- addRanks(sigRes, signs = c(-1, 1, -1))
-write.csv(sigRes, 'Gene associated with pseudotime - Ctrl-0h-12h-24h.csv')
 
-a <- subset(res, pvalue < 1e-4 & meanLogFC > 1 & waldStat > 100)
-sigGenes <- rownames(a)
+w <- createResultsTable(seurats, 
+                        res, 
+                        'Genes associated with pseudotime - Ctrl-0h-12h-24h')
 
-
-featureWes(miniSeurat, 'FTH1', idClass = 'orig.ident')
+featureWes(miniSeurat, 'CRYAB', idClass = 'orig.ident')
 DimPlot(miniSeurat, group.by='orig.ident')
 
 #################Second trajectory: Control - 24h - 12h - 0h#####################
@@ -53,4 +52,4 @@ p1 <- featureWes(miniSeurat, 'Lineage1', idClass='orig.ident',
     geom_segment(data=df, aes(x=x, y=y, xend=xEnd, yend=yEnd),
                  arrow = arrow(length = unit(0.1, "cm")))
 
-v <- subset(miniSeurat, features=VariableFeatures(miniSeurat)[1:100])
+gam <- computeGam(miniSeurat, sce, 'mgcGam_ctrl-24-12-0')
