@@ -1,3 +1,4 @@
+#################First trajectory: Control - 0h - 12h - 24h#####################
 miniSeurat <- qs_read('MGCSeurat005.qs2')
 
 sce <- as.SingleCellExperiment(miniSeurat)
@@ -17,57 +18,40 @@ p1 <- featureWes(miniSeurat, 'Lineage1', idClass='orig.ident',
     geom_segment(data=df, aes(x=x, y=y, xend=xEnd, yend=yEnd),
                  arrow = arrow(length = unit(0.1, "cm")))
 
-pseudotime <- slingPseudotime(sce)
-cellWeights <- slingCurveWeights(sce)
-
-counts <- LayerData(miniSeurat, assay='RNA', layer='counts')
-
-x <- Sys.time()
-BPPARAM <- BiocParallel::bpparam()
-BPPARAM$workers <- 60
-
-gam <- fitGAM(counts,
-              pseudotime=pseudotime,
-              cellWeights=cellWeights,
-              parallel=TRUE,
-              BPPARAM=BPPARAM)
-qs_save(gam, 'mgcGam.qs2')
-
-y <- Sys.time()
-print(y - x)
-
 gam <- qs_read('mgcGam.qs2')
 res <- associationTest(gam)
-a <- subset(res, pvalue < 1e-04 & meanLogFC > 0.8 & waldStat > 50)
+sigRes <- subset(res, pvalue < 1e-2)
+sigRes$df <- c()
+View(sigRes)
+sigRes <- sigRes[order(sigRes$waldStat, decreasing=TRUE), ]
+write.csv(sigRes, 'Gene associated with pseudotime - Ctrl-0h-12h-24h.csv')
+
+a <- subset(res, pvalue < 1e-4 & meanLogFC > 1 & waldStat > 100)
 sigGenes <- rownames(a)
 
-pt <- slingPseudotime(sce)[, 1] 
-ord <- order(pt)
-expr <- log1p(counts(sce)[sigGenes, ord])
-exprScaled <- t(scale(t(expr)))
-exprOrdered <- exprScaled[, ord] 
 
-genePeak <- apply(exprOrdered, 1, function(gene) {
-    sm <- zoo::rollmean(gene, 3, fill = NA)
-    which.max(sm)
-})
-ordGenes <- order(genePeak)
-exprOrdered <- exprOrdered[ordGenes, ]
-ptOrdered <- pt[colnames(exprOrdered)]
+featureWes(miniSeurat, 'FTH1', idClass = 'orig.ident')
+DimPlot(miniSeurat, group.by='orig.ident')
 
+#################Second trajectory: Control - 24h - 12h - 0h#####################
+miniSeurat <- qs_read('MGCSeurat005.qs2')
 
-colFun <- colorRamp2(
-    breaks = c(-1, 4),  
-    colors = c('magenta4', 'gold')
-)
+sce <- as.SingleCellExperiment(miniSeurat)
+sce <- slingshot(sce,
+                 clusterLabels = 'orig.ident',
+                 reducedDim = 'UMAP',
+                 start.clus = 'Control',
+                 end.clus = '0h',
+                 dist.method = 'simple')
 
-Heatmap(
-    exprOrdered,
-    name = 'Expression',
-    col = colFun,
-    cluster_columns = FALSE,
-    cluster_rows = FALSE,
-    show_column_names = FALSE,
-    show_row_names = FALSE,
-    column_title = "Genes varying along Slingshot pseudotime"
-)
+miniSeurat <- addLineages(miniSeurat, sce)
+mat <- extractLineageMat(sce, 'Lineage1')
+df <- points2Seg(mat)
+p <- singleLineagePlot(miniSeurat, sce, 'Lineage1', 'orig.ident')
+
+p1 <- featureWes(miniSeurat, 'Lineage1', idClass='orig.ident',
+                 labelSize=4) + labs(color='Pseudotime') +
+    geom_segment(data=df, aes(x=x, y=y, xend=xEnd, yend=yEnd),
+                 arrow = arrow(length = unit(0.1, "cm")))
+
+v <- subset(miniSeurat, features=VariableFeatures(miniSeurat)[1:100])

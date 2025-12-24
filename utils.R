@@ -1,0 +1,1 @@
+addRanks <- function(df, columns, addMeanRank)
