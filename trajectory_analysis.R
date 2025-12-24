@@ -22,8 +22,7 @@ gam <- qs_read('mgcGam.qs2')
 res <- associationTest(gam)
 sigRes <- subset(res, pvalue < 1e-2)
 sigRes$df <- c()
-View(sigRes)
-sigRes <- sigRes[order(sigRes$waldStat, decreasing=TRUE), ]
+sigRes <- addRanks(sigRes, signs = c(-1, 1, -1))
 write.csv(sigRes, 'Gene associated with pseudotime - Ctrl-0h-12h-24h.csv')
 
 a <- subset(res, pvalue < 1e-4 & meanLogFC > 1 & waldStat > 100)
