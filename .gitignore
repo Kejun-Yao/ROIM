@@ -2,6 +2,7 @@
 .Rhistory
 .Rproj.user
 R/.test_code.R
+Results
 *.Rproj
 *.qs2
 *.RData
