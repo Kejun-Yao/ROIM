@@ -34,7 +34,10 @@ seuratObj <- qs_read('mergedSeurat.qs2')
 seuratObj <- removeRareFeatures(seuratObj, 10, 'RNA')
 seuratObj <- removeRareFeatures(seuratObj, 10, 'ATAC')
 seuratObj <- basicDimRed(seuratObj)
-seuratObj <- jointUMAP(seuratObj)
+
+#这里应该传cutoff = 0.1，若cutoff = NULL，根据jointUMAP代码，不会执行自动计算所需dim
+#或者在定义jointUMAP时，cutoff默认给0.1
+seuratObj <- jointUMAP(seuratObj, cutoff = 0.1)
 qs_save(seuratObj,'preclusteringSeurat.qs2')
 
 seuratObj <- qs_read('preclusteringSeurat.qs2')
